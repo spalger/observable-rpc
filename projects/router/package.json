@@ -1,0 +1,15 @@
+{
+  "name": "@rxrpc/router",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "babel --verbose --copy-files --delete-dir-on-start --out-dir=lib/router src/router"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.44",
+    "@babel/core": "^7.0.0-beta.44",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.44",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.44",
+    "@babel/preset-env": "^7.0.0-beta.44"
+  }
+}
