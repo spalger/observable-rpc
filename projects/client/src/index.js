@@ -1,0 +1,1 @@
+export { createRxRpcClient } from './client'

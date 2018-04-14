@@ -2,14 +2,19 @@
   "name": "@rxrpc/client",
   "version": "0.0.0",
   "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "jsnext:main": "src/index.js",
   "scripts": {
-    "build": "webpack"
+    "build": "babel --verbose --copy-files --delete-dir-on-start --out-dir=dist src"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.44",
     "@babel/core": "^7.0.0-beta.44",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.44",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.44",
-    "@babel/preset-env": "^7.0.0-beta.44"
+    "@rxrpc/babel-preset": "0.0.0"
+  },
+  "dependencies": {
+    "max-safe-integer": "^1.0.1",
+    "rxjs": "^6.0.0-beta.4",
+    "socket.io-client": "^2.1.0"
   }
 }

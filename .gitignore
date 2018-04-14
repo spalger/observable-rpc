@@ -4,3 +4,4 @@ yarn*log
 .DS_Store
 /.eslintcache
 __tmp__
+/projects/*/dist

@@ -3,6 +3,10 @@ module.exports = {
 
   extends: ['eslint:recommended', 'prettier'],
 
+  env: {
+    es6: true,
+  },
+
   parserOptions: {
     ecmaVersion: '2018',
     sourceType: 'module',
@@ -24,6 +28,7 @@ module.exports = {
     'import/no-named-as-default': 'error',
     'import/no-named-as-default-member': 'error',
     'import/no-duplicates': 'error',
+    'import/unambiguous': 'error',
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -37,6 +42,26 @@ module.exports = {
   },
 
   overrides: [
+    /**
+     * Files that are not transpiled
+     */
+    {
+      files: ['.eslintrc.js', 'scripts/**', 'projects/babel-preset/**'],
+      parserOptions: {
+        sourceType: 'script',
+      },
+      rules: {
+        'import/no-commonjs': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ImportDeclaration',
+          'ExportNamedDeclaration',
+          'ExportDefaultDeclaration',
+          'ExportAllDeclaration',
+        ],
+      },
+    },
+
     /**
      * Node.js files
      */
