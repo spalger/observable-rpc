@@ -1,5 +1,0 @@
-{
-  "presets": [
-    "@rxrpc/babel-preset/node"
-  ]
-}

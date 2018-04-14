@@ -1,5 +1,0 @@
-{
-  "presets": [
-    "module:@rxrpc/babel-preset/browser"
-  ]
-}

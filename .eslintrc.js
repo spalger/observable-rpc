@@ -73,6 +73,16 @@ module.exports = {
     },
 
     /**
+     * Dev scripts/utils
+     */
+    {
+      files: ['scripts/**/*'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+
+    /**
      * Browser compatible files
      */
     {
@@ -96,16 +106,6 @@ module.exports = {
             peerDependencies: true,
           },
         ],
-      },
-    },
-
-    /**
-     * Files without dependency restrictions
-     */
-    {
-      files: ['scripts/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': 'off',
       },
     },
 

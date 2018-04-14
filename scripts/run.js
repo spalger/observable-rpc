@@ -1,6 +1,5 @@
-/* eslint-disable no-console */
-
-const childProcess = require('child_process')
+const execa = require('execa')
+const chalk = require('chalk')
 const { readdir } = require('fs')
 const readline = require('readline')
 const { resolve } = require('path')
@@ -19,8 +18,6 @@ const {
   first,
 } = require('rxjs/operators')
 
-const chalk = require('chalk')
-
 const PROJECT_DIR = resolve(__dirname, '../projects')
 const COMMAND = process.argv[2]
 
@@ -34,26 +31,6 @@ const colors = [
   'cyan',
   'lime',
 ]
-
-const procs = new Set()
-const exec = (cmd, options) => {
-  const proc = childProcess.spawn(cmd, options)
-  procs.add(proc)
-  proc.once('exit', () => procs.delete(proc))
-  return proc
-}
-
-process.on('SIGINT', () => {
-  for (const proc of procs) {
-    proc.kill('SIGINT')
-  }
-})
-
-process.on('exit', () => {
-  for (const proc of procs) {
-    proc.kill('SIGKILL')
-  }
-})
 
 const readableLines = str =>
   new Rx.Observable(observer => {
@@ -80,10 +57,6 @@ const project$ = Rx.bindNodeCallback(readdir)(PROJECT_DIR).pipe(
       throw new Error('specify the command to run')
     }
 
-    if (COMMAND === 'install') {
-      return true
-    }
-
     return project.pkg.scripts && project.pkg.scripts[COMMAND]
   }),
   shareReplay()
@@ -92,12 +65,9 @@ const project$ = Rx.bindNodeCallback(readdir)(PROJECT_DIR).pipe(
 project$
   .pipe(
     mergeMap(async project => {
-      const cmd = COMMAND === 'install' ? 'yarn' : 'yarn run ' + COMMAND
-
-      const proc = exec(cmd, {
+      const proc = execa('yarn', ['run', COMMAND], {
         stdio: ['ignore', 'pipe', 'pipe'],
         cwd: project.path,
-        shell: true,
       })
 
       const color = colors.shift()
@@ -142,4 +112,5 @@ project$
   .toPromise()
   .catch(error => {
     console.error('FATAL ERROR', error.stack)
+    process.exit(1)
   })

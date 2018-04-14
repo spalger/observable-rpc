@@ -1,8 +1,14 @@
 export const errorResponseToError = params => {
-  const { message, ...extraParams } = params
-  const error = new Error(
-    `RPC[${params.statusCode || '?'}:${params.type || 'Error'}] - ${message ||
-      'no message'}`
-  )
-  return Object.assign(error, extraParams)
+  const {
+    statusCode = '?',
+    error = 'Unknown Error',
+    message = '',
+    ...extraParams
+  } = params
+
+  return Object.assign(new Error(`RPC[${statusCode}:${error}] - ${message}`), {
+    statusCode,
+    type: error,
+    ...extraParams,
+  })
 }

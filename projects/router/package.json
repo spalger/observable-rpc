@@ -1,11 +1,5 @@
 {
   "name": "@rxrpc/router",
   "version": "0.0.0",
-  "license": "Apache-2.0",
-  "scripts": {
-    "build": "babel --verbose --copy-files --delete-dir-on-start --out-dir=dist src"
-  },
-  "devDependencies": {
-    "@rxrpc/babel-preset": "0.0.0"
-  }
+  "license": "Apache-2.0"
 }
