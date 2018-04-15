@@ -38,10 +38,12 @@ const router = new ObservableRpcRouter({
     {
       name: 'counter',
       // use Joi schemas to validate params passed to this method, See https://github.com/hapijs/joi/
-      validate: (Joi) => Joi.object().keys({
-        ms: Joi.number().default(100),
-        limit: Joi.number().default(10)
-      }).default(),
+      validate: (Joi) => (
+        Joi.object().keys({
+          ms: Joi.number().default(100),
+          limit: Joi.number().default(10)
+        }).default()
+      ),
       handler: ({ ms, limit }) => (
         Rx.Observable.interval(ms).take(limit)
       )
@@ -59,7 +61,7 @@ import { ObservableRpcClient } from '@observable-rpc/client'
 
 const client = ObservableRpcClient('http://localhost:3000/rpc')
 
-client.get('counter', { ms: 100 }).subscribe({
+client.call('counter', { ms: 100 }).subscribe({
   next(value) {
     console.log('counter:next', value)
   },
