@@ -44,17 +44,9 @@ Wraps a Socket.IO WebSocket server and maps requests from clients to methods.
 
   The `context$` provides two major features:
 
-    1. authentication
+    1. **authentication**: To authenticate connections, which you should probably be doing, return a `Promise` or an `Observable` from `createContext$` and do whatever async logic necessary to validate the `socket.request.headers`, or wait for additional messages using `socket.on()`. All method calls by the RPC client will be blocked until `context$` produces a value. If *at any time* `context$` emits an error or rejects, the error will be sent as the final message to the RPC connection and the connection will be destroyed.
 
-      To authenticate connections, which you should probably be doing, return a `Promise` or an `Observable` from `createContext$` and do whatever async logic necessary to validate the `socket.request.headers`, or wait for additional messages by listening using `socket.on()`. All method calls by the RPC client will be blocked until `context$` produces a value.
-
-      If `context$` emits an error/rejects the error will be sent as the final message to the RPC connection and the connection will be destroyed.
-
-    1. socket specific arguments to methods
-
-      The most recent value produced by the `context$` will be passed as the second argument to all methods called by this RPC client.
-
-      This is how you can expose API clients, configuration, or functionality that is user specific to your router methods.
+    1. **socket specific arguments to methods**: The most recent value produced by the `context$` will be passed as the second argument to all methods called by this RPC client. This is how you can expose API clients, configuration, or functionality that is user specific to your router methods.
 
 #### methods
 
