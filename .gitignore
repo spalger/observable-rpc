@@ -1,6 +1,7 @@
 node_modules
 /lib
 yarn*log
+lerna*log
 .DS_Store
 /.eslintcache
 __tmp__

@@ -44,5 +44,8 @@
     "rxjs": "^6.0.0-beta.4",
     "source-map-support": "^0.5.4",
     "zen-observable": "^0.8.8"
+  },
+  "devDependencies": {
+    "lerna": "^2.10.0"
   }
 }

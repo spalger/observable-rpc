@@ -8,5 +8,8 @@
     "max-safe-integer": "^1.0.1",
     "rxjs": "^6.0.0-beta.4",
     "socket.io-client": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
