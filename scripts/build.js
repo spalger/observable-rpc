@@ -105,6 +105,7 @@ async function run() {
                     try {
                       const { code } = await asyncTransformFile(source, {
                         envName: dev ? 'development' : 'production',
+                        sourceMaps: dev ? 'inline' : false,
                         cwd: ROOT,
                         highlightCode: true,
                       })

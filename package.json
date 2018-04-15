@@ -23,6 +23,7 @@
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.44",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.44",
     "@babel/preset-env": "^7.0.0-beta.44",
+    "@babel/register": "^7.0.0-beta.44",
     "babel-core": "^7.0.0-0",
     "babel-jest": "^22.4.3",
     "chalk": "^2.3.2",
@@ -41,6 +42,7 @@
     "lint-staged": "^7.0.4",
     "prettier": "^1.11.1",
     "rxjs": "^6.0.0-beta.4",
+    "source-map-support": "^0.5.4",
     "zen-observable": "^0.8.8"
   }
 }

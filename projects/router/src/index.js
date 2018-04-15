@@ -1,1 +1,1 @@
-export default function createRouter() {}
+export { createRxRpcRouter } from './router'

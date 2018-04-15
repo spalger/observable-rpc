@@ -28,7 +28,6 @@ module.exports = {
     'import/no-named-as-default': 'error',
     'import/no-named-as-default-member': 'error',
     'import/no-duplicates': 'error',
-    'import/unambiguous': 'error',
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -73,10 +72,10 @@ module.exports = {
     },
 
     /**
-     * Dev scripts/utils
+     * Allow console in certain non-shipping components
      */
     {
-      files: ['scripts/**/*'],
+      files: ['scripts/**/*', 'projects/example/**/*'],
       rules: {
         'no-console': 'off',
       },

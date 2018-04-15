@@ -1,64 +1,57 @@
 import * as Rx from 'rxjs'
-import { filter, tap } from 'rxjs/operators'
+import { tap, map, dematerialize } from 'rxjs/operators'
 
-import { logWarning, createSocket, errorResponseToError } from './lib'
+import { createSocket, errorResponseToError, logWarning } from './lib'
 
 export function createRxRpcClient(url) {
   let idCounter = 0
+
   const socket = createSocket(url)
 
+  socket.on('rpc:e', error => {
+    logWarning(errorResponseToError(error))
+  })
+
   return new class RpcClient {
-    subscribe(method, params) {
+    get(method, params) {
       return Rx.Observable.create(observer => {
         const id = ++idCounter
-        let needAbort = true
+        let sendUnsub = true
 
         // consume the incoming responses for this request
         observer.add(
-          Rx.fromEvent(socket, 'notif')
-            .pipe(
-              filter(msg => msg.id === id),
-              tap(({ kind, value, error }) => {
-                switch (kind) {
-                  case 'N':
-                    observer.next(value)
-                    return
-                  case 'C':
-                    needAbort = false
-                    observer.complete()
-                    return
-                  case 'E':
-                    needAbort = false
-                    observer.error(errorResponseToError(error))
-                    return
-                  default:
-                    logWarning('Unexpected message kind', kind)
-                    return
-                }
-              })
+          Rx.merge(
+            Rx.fromEvent(socket, `rpc:n:${id}`).pipe(
+              map(value => Rx.Notification.createNext(value))
+            ),
+            Rx.fromEvent(socket, `rpc:e:${id}`).pipe(
+              tap(() => {
+                sendUnsub = false
+              }),
+              map(error =>
+                Rx.Notification.createError(errorResponseToError(error))
+              )
+            ),
+            Rx.fromEvent(socket, `rpc:c:${id}`).pipe(
+              tap(() => {
+                sendUnsub = false
+              }),
+              map(() => Rx.Notification.createComplete())
             )
-            .subscribe({
-              error(error) {
-                logWarning('Unhandled error in RpcClient#subscribe()', error)
-                observer.error()
-              },
-              complete() {
-                logWarning(
-                  'Unexpected completion of socket notifications in RpcClient#subscribe()'
-                )
-              },
-            })
+          )
+            .pipe(dematerialize())
+            .subscribe(observer)
         )
 
         // if we unsub before we get "complete" or "error"
-        // then ask the server to abort
+        // then ask the server to stop sending responses for this request
         observer.add(() => {
-          if (needAbort) {
-            socket.emit('rpc:abort', { id })
+          if (sendUnsub) {
+            socket.emit('rpc:unsubscribe', { id })
           }
         })
 
-        // send the actual request to the server
+        // send the subscription request to the server
         socket.emit('rpc:subscribe', {
           id,
           method,

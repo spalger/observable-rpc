@@ -6,9 +6,16 @@ export const errorResponseToError = params => {
     ...extraParams
   } = params
 
-  return Object.assign(new Error(`RPC[${statusCode}:${error}] - ${message}`), {
-    statusCode,
-    type: error,
-    ...extraParams,
-  })
+  return Object.assign(
+    new Error(
+      `RPC[${statusCode}:${error}]${
+        message && message !== error ? ` - ${message}` : ''
+      }`
+    ),
+    {
+      statusCode,
+      type: error,
+      ...extraParams,
+    }
+  )
 }
