@@ -1,6 +1,6 @@
 # `@observable-rpc/router`
 
-Creates a router that accepts websocket requests for methods to be run on the server.
+Creates a router that accepts WebSocket requests for methods to be run on the server.
 
 Use the `@observable-rpc/client` package to call to the router from the browser.
 
@@ -13,7 +13,7 @@ import { ObservableRpcRouter } from '@observable-rpc/router'
 const router = new ObservableRpcRouter(options)
 ```
 
-Wraps a Socket.IO websocket server and maps requests from clients to methods.
+Wraps a Socket.IO WebSocket server and maps requests from clients to methods.
 
 #### options
 - **`options.server`: `HttpServer`**
@@ -36,7 +36,25 @@ Wraps a Socket.IO websocket server and maps requests from clients to methods.
 
     `validate: (Joi) => JoiSchema`: *optional* -- A function to generate a [Joi](https://github.com/hapijs/joi) schema that will be used to validate params sent from callers.
 
-    `handler: (params) => Observable`: A function that takes validated params from callers and creates Observables that will be sent back to the caller.
+    `handler: (params, context) => Observable`: A function that takes validated params from callers and creates Observables that will be sent back to the caller.
+
+- **`options.createContext$`: `(socket) => ObservableInput<Object>`**
+
+  An *optional* function that is called when a new socket connects. It must return an `Observable`, a `Promise`, or an `Iterable` which will be converted into an `Observable`; the `context$`.
+
+  The `context$` provides two major features:
+
+    1. authentication
+
+      To authenticate connections, which you should probably be doing, return a `Promise` or an `Observable` from `createContext$` and do whatever async logic necessary to validate the `socket.request.headers`, or wait for additional messages by listening using `socket.on()`. All method calls by the RPC client will be blocked until `context$` produces a value.
+
+      If `context$` emits an error/rejects the error will be sent as the final message to the RPC connection and the connection will be destroyed.
+
+    1. socket specific arguments to methods
+
+      The most recent value produced by the `context$` will be passed as the second argument to all methods called by this RPC client.
+
+      This is how you can expose API clients, configuration, or functionality that is user specific to your router methods.
 
 #### methods
 

@@ -1,6 +1,6 @@
 # `@observable-rpc/client`
 
-Creates a router that accepts websocket requests for methods to be run on the server.
+Creates a router that accepts WebSocket requests for methods to be run on the server.
 
 Use the `@observable-rpc/router` package to determine what methods will be exposed to the browser.
 

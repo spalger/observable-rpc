@@ -23,8 +23,8 @@ import { createServer } from 'http'
 import * as Rx from 'rxjs'
 import { ObservableRpcRouter } from '@observable-rpc/router'
 
-const server = createServer((req, resp) => {
-  resp.end('hello world')
+const server = createServer((request, response) => {
+  response.end('hello world')
 })
 
 const router = new ObservableRpcRouter({
