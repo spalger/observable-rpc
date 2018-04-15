@@ -1,6 +1,6 @@
 # `@observable-rpc`
 
-Basic RPC implementation for browser -> node.js RPC calls that expose Observables
+Basic RPC implementation for browser/node.js -> node.js RPC calls that expose Observables
 on both ends.
 
 Use the [`@observable-rpc/router`](./projects/router/README.md) package to add the router to your server.
