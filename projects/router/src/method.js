@@ -26,10 +26,7 @@ export class Method {
   exec(req, context) {
     return Rx.defer(() => {
       const params = validate(req.params, this._paramSchema)
-      return this._handler(params, {
-        req,
-        ...context,
-      })
+      return this._handler(params, context)
     })
   }
 }
