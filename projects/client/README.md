@@ -18,7 +18,7 @@ Wraps a Socket.IO client to send requests to the server and handle responses.
 #### options
 - **`options.url`: `String`**
 
-  The protocol+hostname+port+path the `ObservableRpcClient` should use to talk to the `ObservableRpcRouter`.
+  The protocol+hostname+port+path the `ObservableRpcClient` should use to talk to the `ObservableRpcRouter`. When run in the browser this will default to the current protocol+host+port and the path `/rpc`.
 
 #### methods
 - **`ObservableRpcClient#call(method, params): Observable`**
