@@ -4375,6 +4375,27 @@ listr@^0.13.0:
     stream-to-observable "^0.2.0"
     strip-ansi "^3.0.1"
 
+listr@^0.14.0:
+  version "0.14.0"
+  resolved "https://registry.npmjs.org/listr/-/listr-0.14.0.tgz#3abc68909aacd2273319644c24dea236ad7fbe7f"
+  dependencies:
+    cli-truncate "^0.2.1"
+    figures "^1.7.0"
+    indent-string "^2.1.0"
+    is-observable "^0.2.0"
+    is-promise "^2.1.0"
+    is-stream "^1.1.0"
+    listr-silent-renderer "^1.1.1"
+    listr-update-renderer "^0.4.0"
+    listr-verbose-renderer "^0.4.0"
+    log-symbols "^1.0.2"
+    log-update "^1.0.2"
+    ora "^0.2.3"
+    p-map "^1.1.1"
+    rxjs "^5.6.0-forward-compat.0 || ^6.0.0-rc.1"
+    stream-to-observable "^0.2.0"
+    strip-ansi "^3.0.1"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -5876,6 +5897,12 @@ rxjs@^5.4.2:
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.8.tgz#b2b0809a57614ad6254c03d7446dea0d83ca3791"
   dependencies:
     symbol-observable "1.0.1"
+
+"rxjs@^5.6.0-forward-compat.0 || ^6.0.0-rc.1":
+  version "6.0.0-uncanny-rc.7"
+  resolved "https://registry.npmjs.org/rxjs/-/rxjs-6.0.0-uncanny-rc.7.tgz#e5d6ebe2c538c583bf4b3600b60112d64a7a6991"
+  dependencies:
+    tslib "^1.9.0"
 
 rxjs@^6.0.0-beta.4:
   version "6.0.0-beta.4"
