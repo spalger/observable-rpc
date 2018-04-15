@@ -1,14 +1,7 @@
 import createSocketIo from 'socket.io'
 import Boom from 'boom'
 import * as Rx from 'rxjs'
-import {
-  subscribeOn,
-  merge,
-  take,
-  mergeMap,
-  ignoreElements,
-  shareReplay,
-} from 'rxjs/operators'
+import { subscribeOn, take, mergeMap, shareReplay } from 'rxjs/operators'
 
 import { parseOptions } from './options'
 import { Request } from './request'
@@ -42,13 +35,11 @@ export class ObservableRpcRouter {
   _onSocket(socket) {
     const subscriptions = new Map()
 
-    const socketContext$ = Rx.from(this._createContext$(socket)).pipe(
-      shareReplay(1)
-    )
+    const context$ = Rx.from(this._createContext$(socket)).pipe(shareReplay(1))
 
     subscriptions.set(
       contextSubKey,
-      socketContext$.subscribe({
+      context$.subscribe({
         error(error) {
           Boom.boomify(error, {
             statusCode: 500,
@@ -87,28 +78,11 @@ export class ObservableRpcRouter {
         return
       }
 
-      const method$ = Rx.defer(() => {
-        const method = this._methodsByName.get(req.method)
-
-        if (!method) {
-          this._log('warning', 'rpc:subscribe with unknown method', req)
-          throw Boom.notFound(`Unknown method '${req.method}'`)
-        }
-
-        return [method]
-      })
-
-      const thisContext$ = socketContext$.pipe(take(1))
-      const result$ = mergeMap(([method, context]) => method.exec(req, context))
-
       subscriptions.set(
         req.id,
-        Rx.combineLatest(method$, thisContext$)
+        Rx.combineLatest(this._methodForRequest(req), context$.pipe(take(1)))
           .pipe(
-            result$,
-
-            // merge in errors from socketContext$
-            merge(socketContext$.pipe(ignoreElements())),
+            mergeMap(([method, context]) => method.exec(req, context)),
 
             // ensure that subscription is in subscriptions map before
             // any notifications are delivered so that we can safely call
@@ -168,6 +142,19 @@ export class ObservableRpcRouter {
         subscriptions.delete(id)
         subscription.unsubscribe()
       }
+    })
+  }
+
+  _methodForRequest(req) {
+    return Rx.defer(() => {
+      const method = this._methodsByName.get(req.method)
+
+      if (!method) {
+        this._log('warning', 'rpc:subscribe with unknown method', req)
+        throw Boom.notFound(`Unknown method '${req.method}'`)
+      }
+
+      return [method]
     })
   }
 
