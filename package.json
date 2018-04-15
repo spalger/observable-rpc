@@ -11,7 +11,8 @@
   },
   "scripts": {
     "test": "node scripts/jest",
-    "lint": "node scripts/eslint"
+    "lint": "node scripts/eslint",
+    "release": "node scripts/build && lerna publish"
   },
   "husky": {
     "hooks": {
