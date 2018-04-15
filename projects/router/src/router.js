@@ -6,15 +6,24 @@ import { subscribeOn } from 'rxjs/operators'
 import { parseOptions } from './options'
 import { Request } from './request'
 
-export function createRpcRouter(options) {
-  const { server, methodsByName, log } = parseOptions(options)
+export class ObservableRpcRouter {
+  constructor(options) {
+    const { server, methodsByName, log, path } = parseOptions(options)
 
-  const io = createSocketIo(server, {
-    path: '/rpc',
-    serveClient: false,
-  })
+    this._methodsByName = methodsByName
+    this._log = log
 
-  io.on('connection', socket => {
+    this._io = createSocketIo(server, {
+      path: path,
+      serveClient: false,
+    })
+
+    this._io.on('connection', socket => {
+      this._onSocket(socket)
+    })
+  }
+
+  _onSocket(socket) {
     const subscriptions = new Map()
 
     socket.on('rpc:subscribe', reqSpec => {
@@ -29,10 +38,10 @@ export function createRpcRouter(options) {
         return
       }
 
-      log.info('rpc:subscribe', req)
+      this._log('info', 'rpc:subscribe', req)
 
       if (subscriptions.has(req.id)) {
-        log.warning('rpc:subscribe with existing id', req)
+        this._log('warning', 'rpc:subscribe with existing id', req)
         socket.emit(
           `rpc:e`,
           Boom.badRequest(
@@ -45,10 +54,10 @@ export function createRpcRouter(options) {
       subscriptions.set(
         req.id,
         Rx.defer(() => {
-          const method = methodsByName.get(req.method)
+          const method = this._methodsByName.get(req.method)
 
           if (!method) {
-            log.warning('rpc:subscribe with unknown method', req)
+            this._log('warning', 'rpc:subscribe with unknown method', req)
             throw Boom.notFound(`Unknown method '${req.method}'`)
           }
 
@@ -66,7 +75,7 @@ export function createRpcRouter(options) {
             },
             error(error) {
               if (!(error instanceof Error)) {
-                log.warning(`rpc method emitted a non-error error`, {
+                this._log('warning', `rpc method emitted a non-error error`, {
                   req,
                   error,
                 })
@@ -81,7 +90,7 @@ export function createRpcRouter(options) {
               })
 
               if (error.isServer) {
-                log.error('rpc method error', {
+                this._log('error', 'rpc method error', {
                   error,
                 })
               }
@@ -103,7 +112,7 @@ export function createRpcRouter(options) {
         return
       }
 
-      log.info('rpc:unsubscribe', { id })
+      this._log('info', 'rpc:unsubscribe', { id })
       subscriptions.get(id).unsubscribe()
       subscriptions.delete(id)
     })
@@ -114,15 +123,13 @@ export function createRpcRouter(options) {
         subscription.unsubscribe()
       }
     })
-  })
+  }
 
-  return new class RpcRouter {
-    async close() {
-      await new Promise((resolve, reject) => {
-        io.close(error => {
-          error ? reject(error) : resolve()
-        })
+  async close() {
+    await new Promise((resolve, reject) => {
+      this._io.close(error => {
+        error ? reject(error) : resolve()
       })
-    }
-  }()
+    })
+  }
 }

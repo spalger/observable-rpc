@@ -3,30 +3,31 @@
 Basic RPC implementation for browser -> node.js RPC calls that expose Observables
 on both ends.
 
-Use the `@observable-rpc/router` package to add the websocket server to your server.
+Use the [`@observable-rpc/router`](./projects/router/README.md) package to add the router to your server.
 
-Use the `@observable-rpc/client` pacakge to call the RPC methods from the browser.
+Use the [`@observable-rpc/client`](./projects/client/README.md) package to call to the router from the browser.
 
-## Quick start
+## quick start
 
-Install the packages in your project
+Install the packages in your project:
+
 ```sh
 npm install @observable-rpc/router @observable-rpc-client
 ```
 
-Instantiate the router within your server:
+Instantiate the router with your server:
 
 ```js
 import { createServer } from 'http'
 
 import * as Rx from 'rxjs'
-import { createRpcRouter } from '@observable-rpc/router'
+import { ObservableRpcRouter } from '@observable-rpc/router'
 
 const server = createServer((req, resp) => {
   resp.end('hello world')
 })
 
-const router = createRpcRouter({
+const router = new ObservableRpcRouter({
   server,
   methods: [
     {
@@ -35,14 +36,14 @@ const router = createRpcRouter({
       handler: () => ['bar'],
     },
     {
-      name: 'interval',
+      name: 'counter',
       // use Joi schemas to validate params passed to this method, See https://github.com/hapijs/joi/
       validate: (Joi) => Joi.object().keys({
-        ms: Joi.number().min(100).required(),
-        count: Joi.number().default(10)
+        ms: Joi.number().default(100),
+        limit: Joi.number().default(10)
       }).default(),
-      handler: ({ ms, count }) => (
-        Rx.Observable.interval(ms).take(count)
+      handler: ({ ms, limit }) => (
+        Rx.Observable.interval(ms).take(limit)
       )
     }
   ]
@@ -54,19 +55,19 @@ server.listen(3000)
 Call the methods from the browser:
 
 ```js
-import { createRpcClient } from '@observable-rpc/client'
+import { ObservableRpcClient } from '@observable-rpc/client'
 
-const client = createRpcClient('http://localhost:3000/rpc')
+const client = ObservableRpcClient('http://localhost:3000/rpc')
 
-client.get('interval', { ms: 10, count: 100 }).subscribe({
+client.get('counter', { ms: 100 }).subscribe({
   next(value) {
-    console.log('interval:next', value)
+    console.log('counter:next', value)
   },
   error(error) {
-    console.log('interval:error', error)
+    console.log('counter:error', error)
   },
   complete() {
-    console.log('interval:complete')
+    console.log('counter:complete')
   },
 })
 ```

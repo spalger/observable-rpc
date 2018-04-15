@@ -3,10 +3,10 @@ import { format as formatUrl, parse as parseUrl } from 'url'
 import io from 'socket.io-client'
 
 export function createSocket(url) {
-  const { protocol, host, path } = parseUrl(url)
+  const { protocol, auth, host, path } = parseUrl(url)
 
   // always attempt websockets first
-  const socket = io(formatUrl({ protocol, host }), {
+  const socket = io(formatUrl({ protocol, auth, host }), {
     transports: ['websocket'],
     forceNew: true,
     path,

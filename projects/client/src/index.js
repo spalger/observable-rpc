@@ -1,1 +1,1 @@
-export { createRpcClient } from './client'
+export { ObservableRpcClient } from './client'

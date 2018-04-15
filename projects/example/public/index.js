@@ -1,8 +1,10 @@
-import { createRpcClient } from '@observable-rpc/client'
+import { ObservableRpcClient } from '@observable-rpc/client'
 
-const client = createRpcClient('http://localhost:3000/rpc')
+const client = new ObservableRpcClient({
+  url: 'http://localhost:3000/rpc',
+})
 
-client.get('interval', { ms: 10, count: 100 }).subscribe({
+client.call('interval', { ms: 10, count: 100 }).subscribe({
   next(value) {
     console.log('interval:next', value)
   },

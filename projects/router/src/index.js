@@ -1,1 +1,1 @@
-export { createRpcRouter } from './router'
+export { ObservableRpcRouter } from './router'
