@@ -1,0 +1,3 @@
+.babelrc.js
+src/**/*.test.js
+src/**/__snapshots__/**
