@@ -16,6 +16,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/spalger/observable-rpc/tree/master/projects/client"
+    "url": "https://github.com/spalger/observable-rpc/tree/master/projects/router"
   }
 }
