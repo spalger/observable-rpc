@@ -1,1 +1,1 @@
-export { createRxRpcClient } from './client'
+export { createRpcClient } from './client'

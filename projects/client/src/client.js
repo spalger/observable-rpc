@@ -3,7 +3,7 @@ import { tap, map, dematerialize } from 'rxjs/operators'
 
 import { createSocket, errorResponseToError, logWarning } from './lib'
 
-export function createRxRpcClient(url) {
+export function createRpcClient(url) {
   let idCounter = 0
 
   const socket = createSocket(url)

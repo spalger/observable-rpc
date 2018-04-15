@@ -8,7 +8,7 @@ export class Logger {
       this._handler = handler
     }
 
-    const debug = createDebug('@rxrpc/router')
+    const debug = createDebug('@observable-rpc/router')
     this._handler = {
       info(...args) {
         debug(`info: ${format(...args)}`)

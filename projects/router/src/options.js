@@ -4,13 +4,13 @@ import { Method } from './method'
 export function parseOptions(options) {
   if (!options.server) {
     throw new Error(
-      `createRxRpcRouter() requires a server option, received ${options.server}`
+      `createRpcRouter() requires a server option, received ${options.server}`
     )
   }
 
   if (!Array.isArray(options.methods)) {
     throw new Error(
-      `createRxRpcRouter() requires an array of methods, received ${
+      `createRpcRouter() requires an array of methods, received ${
         options.methods
       }`
     )

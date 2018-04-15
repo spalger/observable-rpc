@@ -1,1 +1,1 @@
-export { createRxRpcRouter } from './router'
+export { createRpcRouter } from './router'

@@ -5,13 +5,13 @@ import webpack from 'webpack'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import middleware from 'webpack-dev-middleware'
 import express from 'express'
-import { createRxRpcRouter } from '@rxrpc/router'
+import { createRpcRouter } from '@observable-rpc/router'
 import * as Rx from 'rxjs'
 import { take } from 'rxjs/operators'
 
 const app = express()
 const server = createServer(app)
-createRxRpcRouter({
+createRpcRouter({
   server,
   methods: [
     {

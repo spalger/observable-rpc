@@ -6,7 +6,7 @@ import { subscribeOn } from 'rxjs/operators'
 import { parseOptions } from './options'
 import { Request } from './request'
 
-export function createRxRpcRouter(options) {
+export function createRpcRouter(options) {
   const { server, methodsByName, log } = parseOptions(options)
 
   const io = createSocketIo(server, {
@@ -116,7 +116,7 @@ export function createRxRpcRouter(options) {
     })
   })
 
-  return new class RxRpcRouter {
+  return new class RpcRouter {
     async close() {
       await new Promise((resolve, reject) => {
         io.close(error => {

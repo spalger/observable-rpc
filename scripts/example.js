@@ -1,6 +1,6 @@
 process.env.DEBUG = (process.env.DEBUG || '')
   .split(',')
-  .concat('@rxrpc/router')
+  .concat('@observable-rpc/router')
   .join(',')
 
 require('source-map-support').install()

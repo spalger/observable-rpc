@@ -1,6 +1,6 @@
-import { createRxRpcClient } from '@rxrpc/client'
+import { createRpcClient } from '@observable-rpc/client'
 
-const client = createRxRpcClient('http://localhost:3000/rpc')
+const client = createRpcClient('http://localhost:3000/rpc')
 
 client.get('interval', { ms: 10, count: 100 }).subscribe({
   next(value) {
