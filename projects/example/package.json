@@ -1,10 +1,10 @@
 {
   "name": "@observable-rpc/example",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "dependencies": {
     "@observable-rpc/client": "^0.0.3",
-    "@observable-rpc/router": "^0.0.3",
+    "@observable-rpc/router": "^0.0.4",
     "express": "^4.16.3",
     "html-webpack-plugin": "^3.2.0",
     "rxjs": "^6.0.0-beta.4",
