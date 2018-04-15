@@ -5,7 +5,7 @@ import { validate } from './validate'
 const SpecSchema = Joi.object()
   .keys({
     name: Joi.string().required(),
-    validate: Joi.func().default(J => J.valid(undefined)),
+    validate: Joi.func().default(J => J.forbidden()),
     handler: Joi.func().required(),
   })
   .default()
