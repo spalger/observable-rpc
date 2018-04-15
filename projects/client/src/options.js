@@ -1,6 +1,6 @@
 import { format as formatUrl, parse as parseUrl } from 'url'
 
-export function parseOptions(options) {
+export function parseOptions(options = {}) {
   if (!options.url && typeof window !== 'undefined') {
     const current = parseUrl(window.location.href) // eslint-disable-line no-undef
 

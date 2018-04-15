@@ -1,8 +1,16 @@
 import { defaultLogger } from './logger'
 import { Method } from './method'
 
+const createEmptyContext$ = () => [{}]
+
 export function parseOptions(options) {
-  const { server, log, methods, path = '/rpc' } = options
+  const {
+    server,
+    methods,
+    log = defaultLogger,
+    path = '/rpc',
+    createContext$ = createEmptyContext$,
+  } = options
 
   if (!server) {
     throw new Error(
@@ -19,7 +27,8 @@ export function parseOptions(options) {
   return {
     server,
     path,
-    log: log || defaultLogger,
+    createContext$,
+    log,
     methodsByName: new Map(
       methods.map(spec => {
         const method = new Method(spec)
