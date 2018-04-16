@@ -1,6 +1,6 @@
 import * as Rx from 'rxjs'
 import { takeUntil, tap, catchError } from 'rxjs/operators'
-import { sharedListener } from './shared_listener'
+import { sharedDisconnect } from './shared_disconnect'
 import { RpcError } from './rpc_error'
 
 /**
@@ -50,7 +50,7 @@ export function send(log, socket, source, subId) {
       takeUntil(
         Rx.race(
           Rx.fromEvent(socket, `rpc:unsub:${subId}`),
-          sharedListener(socket, 'disconnect')
+          sharedDisconnect(socket)
         )
       )
     )

@@ -2,7 +2,7 @@ import * as Rx from 'rxjs'
 import { dematerialize, map, share, take, takeUntil, tap } from 'rxjs/operators'
 
 import { RpcError } from './rpc_error'
-import { sharedListener } from './shared_listener'
+import { sharedDisconnect } from './shared_disconnect'
 
 /**
  * Receive notifications for a subId on a socket and
@@ -33,7 +33,7 @@ export function receive(socket, subId) {
         map(Rx.Notification.createComplete)
       ),
 
-      sharedListener(socket, 'disconnect').pipe(
+      sharedDisconnect(socket).pipe(
         map(() =>
           Rx.Notification.createError(
             new RpcError({
