@@ -1,6 +1,6 @@
 import * as Rx from 'rxjs'
 import { ObservableRpcClient } from '@observable-rpc/client'
-import { take, map, catchError } from 'rxjs/operators'
+import { tap, take, map, catchError } from 'rxjs/operators'
 
 const client = new ObservableRpcClient({
   url: 'http://localhost:3000/rpc',
@@ -21,13 +21,16 @@ client
     },
   })
 
-const sendInput = document.createElement('input')
-sendInput.placeholder = 'Text to reverse server-side (max length 10)'
-document.body.appendChild(sendInput)
+const form = document.createElement('form')
+document.body.appendChild(form)
 
-const pingButton = document.createElement('button')
-pingButton.innerText = 'Ping'
-document.body.appendChild(pingButton)
+const input = document.createElement('input')
+input.placeholder = 'Text to reverse server-side (max length 10)'
+form.appendChild(input)
+
+const submit = document.createElement('button')
+submit.innerText = 'Ping'
+form.appendChild(submit)
 
 const pongOutput = document.createElement('pre')
 document.body.appendChild(pongOutput)
@@ -35,7 +38,10 @@ document.body.appendChild(pongOutput)
 client
   .call(
     'reverse',
-    Rx.fromEvent(pingButton, 'click').pipe(map(() => sendInput.value))
+    Rx.fromEvent(form, 'submit').pipe(
+      tap(e => e.preventDefault()),
+      map(() => input.value)
+    )
   )
   .pipe(
     catchError((error, resubscribe) =>
