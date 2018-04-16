@@ -1,4 +1,4 @@
-export const errorResponseToError = params => {
+export const errorPacketToError = params => {
   const {
     statusCode = '?',
     error = 'Unknown Error',

@@ -1,16 +1,17 @@
 import createSocketIo from 'socket.io'
 import Boom from 'boom'
 import * as Rx from 'rxjs'
-import { subscribeOn, take, mergeMap, shareReplay } from 'rxjs/operators'
+import {
+  mergeMap,
+  share,
+  shareReplay,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs/operators'
 
 import { parseOptions } from './options'
 import { Request } from './request'
-
-const contextSubKey = Symbol('context sub')
-
-function emitError(socket, req, error) {
-  socket.emit(req ? `rpc:e:${req.id}` : 'rpc:e', error.output.payload)
-}
 
 export class ObservableRpcRouter {
   constructor(options) {
@@ -33,129 +34,112 @@ export class ObservableRpcRouter {
   }
 
   _onSocket(socket) {
-    const subscriptions = new Map()
+    // share a subscription to the socket's "disconnect" event to prevent
+    // "potential memory leak" warnings from node because everything listens
+    // for the socket disconnect event
+    const disconnect$ = Rx.fromEvent(socket, 'disconnect').pipe(share())
 
-    const context$ = Rx.from(this._createContext$(socket)).pipe(shareReplay(1))
-
-    subscriptions.set(
-      contextSubKey,
-      context$.subscribe({
-        error(error) {
-          Boom.boomify(error, {
-            statusCode: 500,
-            override: false,
-          })
-          emitError(socket, null, error)
-          socket.disconnect(true)
-        },
-      })
+    // share a replay observable so that even if the context only
+    // produces a single value and completes (the default behavior)
+    // we can retreive the context for each method call
+    const context$ = Rx.from(this._createContext$(socket)).pipe(
+      takeUntil(disconnect$),
+      shareReplay(1)
     )
+
+    // subscribe to context globally so that errors from context
+    // can disconnect the socket
+    context$.subscribe({
+      error(error) {
+        Boom.boomify(error, { message: 'Context error' })
+        socket.emit('rpc:e', this._errorToErrorPacket(error))
+        socket.disconnect(true)
+      },
+    })
 
     socket.on('rpc:subscribe', reqSpec => {
       let req
       try {
         req = new Request(reqSpec)
       } catch (error) {
-        emitError(
-          socket,
-          null,
-          Boom.badRequest(`Invalid request: ${error.message}`)
-        )
+        socket.emit('rpc:e', this._errorToErrorPacket(error))
         return
       }
 
       this._log('info', 'rpc:subscribe', req)
 
-      if (subscriptions.has(req.id)) {
-        this._log('warning', 'rpc:subscribe with existing id', req)
-        emitError(
-          socket,
-          null,
-          Boom.badRequest(
-            `'rpc:subscribe' received for existing subscription id '${req.id}'`
-          )
-        )
-        return
-      }
+      // emit the method for this request
+      const method$ = Rx.defer(() => {
+        const method = this._methodsByName.get(req.method)
 
-      subscriptions.set(
-        req.id,
-        Rx.combineLatest(this._methodForRequest(req), context$.pipe(take(1)))
-          .pipe(
-            mergeMap(([method, context]) => method.exec(req, context)),
+        if (!method) {
+          this._log('warning', 'rpc:subscribe with unknown method', req)
+          throw Boom.notFound(`Unknown method '${req.method}'`)
+        }
 
-            // ensure that subscription is in subscriptions map before
-            // any notifications are delivered so that we can safely call
-            // subscriptions.delete()
-            subscribeOn(Rx.asyncScheduler)
-          )
-          .subscribe({
-            next: value => {
+        return [method]
+      })
+
+      // emit when we should stop sending notifications and unsubscribe
+      const abort$ = Rx.race(
+        Rx.fromEvent(socket, `rpc:unsubscribe:${req.id}`),
+        disconnect$
+      )
+
+      Rx.combineLatest(method$, context$)
+        .pipe(
+          // only get the method+context combo once
+          take(1),
+
+          // execute the method and merge the result observable
+          mergeMap(([method, context]) => method.exec(req, context)),
+
+          // send notifications from result to the socket
+          tap({
+            next(value) {
               socket.emit(`rpc:n:${req.id}`, value)
             },
-            error: error => {
+
+            error(error) {
               if (!(error instanceof Error)) {
-                this._log('warning', `rpc method emitted a non-error error`, {
-                  req,
-                  error,
-                })
+                this._log(
+                  'warning',
+                  `rpc method '${req.method}' emitted a non-error error`,
+                  { req, error }
+                )
 
                 error = new Error(`${typeof error} thrown`)
               }
 
-              Boom.boomify(error, {
-                statusCode: 500,
-                message: 'Unhandled Error',
-                override: false,
-              })
-
-              if (error.isServer) {
-                this._log('error', 'rpc method error', {
-                  error,
-                })
-              }
-
-              subscriptions.delete(req.id)
-              emitError(socket, req, error)
+              socket.emit(`rpc:e:${req.id}`, this._errorToErrorPacket(error))
             },
-            complete: () => {
-              subscriptions.delete(req.id)
+
+            complete() {
               socket.emit(`rpc:c:${req.id}`)
             },
-          })
-      )
-    })
+          }),
 
-    socket.on('rpc:unsubscribe', ({ id }) => {
-      if (!subscriptions.has(id)) {
-        // noop
-        return
-      }
-
-      this._log('info', 'rpc:unsubscribe', { id })
-      subscriptions.get(id).unsubscribe()
-      subscriptions.delete(id)
-    })
-
-    socket.on('disconnect', () => {
-      for (const [id, subscription] of subscriptions) {
-        subscriptions.delete(id)
-        subscription.unsubscribe()
-      }
+          // unsubscribes from results and stops sending notifications to the socket
+          takeUntil(abort$)
+        )
+        .subscribe()
     })
   }
 
-  _methodForRequest(req) {
-    return Rx.defer(() => {
-      const method = this._methodsByName.get(req.method)
-
-      if (!method) {
-        this._log('warning', 'rpc:subscribe with unknown method', req)
-        throw Boom.notFound(`Unknown method '${req.method}'`)
-      }
-
-      return [method]
+  _errorToErrorPacket(error) {
+    Boom.boomify(error, {
+      statusCode: 500,
+      message: 'Unhandled Error',
+      override: false,
     })
+
+    if (error.isServer) {
+      this._log('error', 'rpc error', {
+        error,
+      })
+    }
+
+    return error.output.payload
   }
 
   async close() {

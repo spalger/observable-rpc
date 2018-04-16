@@ -1,6 +1,6 @@
 import Boom from 'boom'
 
-export function validate(toValidate, schema, validationDescription) {
+export function validate(toValidate, schema, description = 'Validation') {
   const { value, error } = schema.validate(toValidate, {
     abortEarly: false,
     stripUnknown: true,
@@ -9,9 +9,7 @@ export function validate(toValidate, schema, validationDescription) {
   if (error) {
     throw Boom.boomify(error, {
       statusCode: 401,
-      message: validationDescription
-        ? `${validationDescription} failure`
-        : 'Validation failure',
+      message: `${description} failure`,
     })
   }
 

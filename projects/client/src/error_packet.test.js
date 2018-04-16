@@ -1,9 +1,9 @@
-import { errorResponseToError } from './errors'
+import { errorPacketToError } from './error_packet'
 
-describe('errorResponseToError', () => {
+describe('errorPacketToError', () => {
   it('converts Boom output to an error object as expected', () => {
     expect(
-      errorResponseToError({
+      errorPacketToError({
         statusCode: 401,
         error: 'Unauthorized',
         message: 'You must specify a username and password',
