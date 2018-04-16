@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`errorPacketToError converts Boom output to an error object as expected 1`] = `[Error: RPC[401:Unauthorized] - You must specify a username and password]`;

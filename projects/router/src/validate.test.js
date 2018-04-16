@@ -23,7 +23,7 @@ it('includes validation description if error message if supplied', () => {
   }).toThrowErrorMatchingSnapshot()
 })
 
-it('throws a Boom 401 error', () => {
+it('throws a RpcError 401 error', () => {
   let thrown
   try {
     validate({}, Joi.object({ foo: Joi.valid('bar').required() }))
@@ -31,6 +31,6 @@ it('throws a Boom 401 error', () => {
     thrown = error
   }
 
-  expect(thrown).toHaveProperty('isBoom', true)
-  expect(thrown.output.payload).toHaveProperty('statusCode', 401)
+  expect(thrown).toHaveProperty('isRpcError', true)
+  expect(thrown).toHaveProperty('statusCode', 401)
 })
