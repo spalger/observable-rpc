@@ -79,7 +79,7 @@ const tasks = new Listr([
     task: () =>
       new Listr([
         {
-          title: 'Determine new version, generate changelogs',
+          title: 'Update packages',
           task: async (ctx, task) => {
             const { version: prevVersion } = await fs.readJson(
               require.resolve('../lerna.json')
@@ -90,8 +90,11 @@ const tasks = new Listr([
               '--force-publish=*',
               '--skip-npm',
               '--skip-git',
-              '--conventional-commits',
+              `--cd-version=${
+                process.argv.includes('--minor') ? 'minor' : 'patch'
+              }`,
               '--yes',
+              '--exact',
             ])
 
             const { version } = await fs.readJson(
@@ -123,7 +126,6 @@ const tasks = new Listr([
         },
         {
           title: 'Publish client to npm',
-          skip: () => process.argv.includes('-n'),
           task: () =>
             execa('npm', ['publish'], {
               cwd: resolve(__dirname, '../projects/client'),
@@ -131,7 +133,6 @@ const tasks = new Listr([
         },
         {
           title: 'Publish router to npm',
-          skip: () => process.argv.includes('-n'),
           task: () =>
             execa('npm', ['publish'], {
               cwd: resolve(__dirname, '../projects/router'),
@@ -139,12 +140,10 @@ const tasks = new Listr([
         },
         {
           title: 'Push branch to Github',
-          skip: () => process.argv.includes('-n'),
           task: () => execa('git', ['push', 'origin', 'master']),
         },
         {
           title: 'Push tag to Github',
-          skip: () => process.argv.includes('-n'),
           task: ctx => execa('git', ['push', 'origin', `v${ctx.version}`]),
         },
       ]),
