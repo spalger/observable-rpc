@@ -1,17 +1,18 @@
 import createSocketIo from 'socket.io'
-import Boom from 'boom'
 import * as Rx from 'rxjs'
-import {
-  mergeMap,
-  share,
-  shareReplay,
-  take,
-  takeUntil,
-  tap,
-} from 'rxjs/operators'
+import { mergeMap, share, shareReplay, take, takeUntil } from 'rxjs/operators'
+import { RpcError, send } from '@observable-rpc/core'
 
+import { Joi } from './joi'
 import { parseOptions } from './options'
-import { Request } from './request'
+import { validate } from './validate'
+
+const ReqSchema = Joi.object()
+  .keys({
+    method: Joi.string().required(),
+    params: Joi.any(),
+  })
+  .default()
 
 export class ObservableRpcRouter {
   constructor(options) {
@@ -24,7 +25,7 @@ export class ObservableRpcRouter {
     this._log = log
 
     this._io = createSocketIo(server, {
-      path: path,
+      path,
       serveClient: false,
     })
 
@@ -34,6 +35,8 @@ export class ObservableRpcRouter {
   }
 
   _onSocket(socket) {
+    let nextSubId = 1
+
     // share a subscription to the socket's "disconnect" event to prevent
     // "potential memory leak" warnings from node because everything listens
     // for the socket disconnect event
@@ -51,95 +54,52 @@ export class ObservableRpcRouter {
     // can disconnect the socket
     context$.subscribe({
       error(error) {
-        Boom.boomify(error, { message: 'Context error' })
-        socket.emit('rpc:e', this._errorToErrorPacket(error))
+        socket.emit(
+          'rpc:e',
+          RpcError.from(error, {
+            message: 'Context error',
+          })
+        )
         socket.disconnect(true)
       },
     })
 
-    socket.on('rpc:subscribe', reqSpec => {
-      let req
+    socket.on('rpc:sub', (req, cb) => {
       try {
-        req = new Request(reqSpec)
+        req = validate(req, ReqSchema, 'Request validation')
       } catch (error) {
-        socket.emit('rpc:e', this._errorToErrorPacket(error))
+        cb({ error: RpcError.from(error) })
         return
       }
 
-      this._log('info', 'rpc:subscribe', req)
-
-      // emit the method for this request
-      const method$ = Rx.defer(() => {
-        const method = this._methodsByName.get(req.method)
-
-        if (!method) {
-          this._log('warning', 'rpc:subscribe with unknown method', req)
-          throw Boom.notFound(`Unknown method '${req.method}'`)
-        }
-
-        return [method]
+      this._log.debug('rpc:sub', {
+        req,
       })
 
-      // emit when we should stop sending notifications and unsubscribe
-      const abort$ = Rx.race(
-        Rx.fromEvent(socket, `rpc:unsubscribe:${req.id}`),
-        disconnect$
+      const method = this._methodsByName.get(req.method)
+      if (!method) {
+        cb({
+          error: RpcError.notFound(`Unknown method '${req.method}'`),
+        })
+        return
+      }
+
+      const subId = nextSubId++
+
+      // send subId before subscribing to ensure it arrives
+      // before sync notifications are sent
+      cb({ subId })
+
+      const result$ = context$.pipe(
+        // only get context at time of request once
+        take(1),
+
+        // execute the method and merge the result observable
+        mergeMap(context => method.exec(req, context))
       )
 
-      Rx.combineLatest(method$, context$)
-        .pipe(
-          // only get the method+context combo once
-          take(1),
-
-          // execute the method and merge the result observable
-          mergeMap(([method, context]) => method.exec(req, context)),
-
-          // send notifications from result to the socket
-          tap({
-            next(value) {
-              socket.emit(`rpc:n:${req.id}`, value)
-            },
-
-            error(error) {
-              if (!(error instanceof Error)) {
-                this._log(
-                  'warning',
-                  `rpc method '${req.method}' emitted a non-error error`,
-                  { req, error }
-                )
-
-                error = new Error(`${typeof error} thrown`)
-              }
-
-              socket.emit(`rpc:e:${req.id}`, this._errorToErrorPacket(error))
-            },
-
-            complete() {
-              socket.emit(`rpc:c:${req.id}`)
-            },
-          }),
-
-          // unsubscribes from results and stops sending notifications to the socket
-          takeUntil(abort$)
-        )
-        .subscribe()
+      send(this._log, socket, result$, subId)
     })
-  }
-
-  _errorToErrorPacket(error) {
-    Boom.boomify(error, {
-      statusCode: 500,
-      message: 'Unhandled Error',
-      override: false,
-    })
-
-    if (error.isServer) {
-      this._log('error', 'rpc error', {
-        error,
-      })
-    }
-
-    return error.output.payload
   }
 
   async close() {

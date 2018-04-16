@@ -24,19 +24,25 @@ Wraps a Socket.IO WebSocket server and maps requests from clients to methods.
 
   Default: `/rpc`. The path on your server where the `ObservableRpcClient` will mount itself and handle requests.
 
-- **`options.log`: `(level, msg, data) => void`**
+- **`options.consumeLog$`: `(log$) => void`**
 
-  By default log messages from `ObservableRpcRouter` are handled with [`debug`](https://www.npmjs.com/package/debug). Pass a log function to handle them yourself.
+  By default log messages from `ObservableRpcRouter` are handled with [`debug`](https://www.npmjs.com/package/debug). Pass a consumeLog$ function to receive a stream of log events to handle them yourself. Log events have the following properties:
+
+  - `level: 'error'|'info'|'debug'`: The level for the log message
+
+  - `msg: String`: The log message, probably pretty short
+
+  - `props: {[key: String]:any}`: An object of metadata relevant to the specific log message
 
 - **`options.methods`: `Array<MethodSpec>`**
 
   An array of methods to expose for RPC. Each `MethodSpec` should be an object that has the following properties:
 
-    `name: String`: The name that clients will use to call this method
+  - `name: String`: The name that clients will use to call this method
 
-    `validate: (Joi) => JoiSchema`: *optional* -- A function to generate a [Joi](https://github.com/hapijs/joi) schema that will be used to validate params sent from callers.
+  - `validate: (Joi) => JoiSchema`: *optional* -- A function to generate a [Joi](https://github.com/hapijs/joi) schema that will be used to validate params sent from callers.
 
-    `handler: (params, context) => Observable`: A function that takes validated params from callers and creates Observables that will be sent back to the caller.
+  - `handler: (params, context) => Observable`: A function that takes validated params from callers and creates Observables that will be sent back to the caller.
 
 - **`options.createContext$`: `(socket) => ObservableInput<Object>`**
 

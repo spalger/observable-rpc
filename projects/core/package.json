@@ -1,0 +1,18 @@
+{
+  "name": "@observable-rpc/core",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "jsnext:main": "src/index.js",
+  "dependencies": {
+    "debug": "^3.1.0",
+    "rxjs": "^6.0.0-beta.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spalger/observable-rpc/tree/master/projects/core"
+  }
+}

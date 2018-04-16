@@ -1,4 +1,4 @@
-import Boom from 'boom'
+import { RpcError } from '@observable-rpc/core'
 
 export function validate(toValidate, schema, description = 'Validation') {
   const { value, error } = schema.validate(toValidate, {
@@ -7,7 +7,7 @@ export function validate(toValidate, schema, description = 'Validation') {
   })
 
   if (error) {
-    throw Boom.boomify(error, {
+    throw RpcError.from(error, {
       statusCode: 401,
       message: `${description} failure`,
     })

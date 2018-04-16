@@ -1,4 +1,6 @@
-import { defaultLogger } from './logger'
+import * as Rx from 'rxjs'
+import { Logger, createLogConsumer } from '@observable-rpc/core'
+
 import { Method } from './method'
 
 const createEmptyContext$ = () => [{}]
@@ -7,7 +9,7 @@ export function parseOptions(options) {
   const {
     server,
     methods,
-    log = defaultLogger,
+    consumeLog$ = createLogConsumer('@observable-rpc/router'),
     path = '/rpc',
     createContext$ = createEmptyContext$,
   } = options
@@ -23,6 +25,9 @@ export function parseOptions(options) {
       `createRpcRouter() requires an array of methods, received ${methods}`
     )
   }
+
+  const log = new Logger()
+  consumeLog$(Rx.from(log))
 
   return {
     server,

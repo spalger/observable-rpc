@@ -21,6 +21,7 @@ const asyncTransformFile = promisify(babel.transformFile)
 const ROOT = resolve(__dirname, '..')
 const DIRS = [
   resolve(ROOT, 'projects/client'),
+  resolve(ROOT, 'projects/core'),
   resolve(ROOT, 'projects/router'),
 ]
 
