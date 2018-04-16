@@ -1,5 +1,7 @@
 module.exports = {
-  plugins: ['import', 'prefer-object-spread', 'jest', 'prettier'],
+  parser: 'babel-eslint',
+
+  plugins: ['import', 'prefer-object-spread', 'jest', 'prettier', 'babel'],
 
   extends: ['eslint:recommended', 'prettier'],
 
@@ -20,6 +22,7 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
 
+    quotes: ['error', 'single', { avoidEscape: true }],
     'import/no-unresolved': ['error', { amd: true, commonjs: true }],
     'import/named': 'error',
     'import/namespace': 'error',
