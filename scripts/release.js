@@ -125,18 +125,36 @@ const tasks = new Listr([
           task: () => execa('node', ['scripts/build']),
         },
         {
-          title: 'Publish client to npm',
+          title: 'npm',
           task: () =>
-            execa('npm', ['publish'], {
-              cwd: resolve(__dirname, '../projects/client'),
-            }),
-        },
-        {
-          title: 'Publish router to npm',
-          task: () =>
-            execa('npm', ['publish'], {
-              cwd: resolve(__dirname, '../projects/router'),
-            }),
+            new Listr(
+              [
+                {
+                  title: 'Publish core to npm',
+                  task: () =>
+                    execa('npm', ['publish'], {
+                      cwd: resolve(__dirname, '../projects/core'),
+                    }),
+                },
+                {
+                  title: 'Publish client to npm',
+                  task: () =>
+                    execa('npm', ['publish'], {
+                      cwd: resolve(__dirname, '../projects/client'),
+                    }),
+                },
+                {
+                  title: 'Publish router to npm',
+                  task: () =>
+                    execa('npm', ['publish'], {
+                      cwd: resolve(__dirname, '../projects/router'),
+                    }),
+                },
+              ],
+              {
+                concurrent: true,
+              }
+            ),
         },
         {
           title: 'Push branch to Github',
