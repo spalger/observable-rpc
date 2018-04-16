@@ -1,6 +1,12 @@
 import * as Rx from 'rxjs'
+import { tap } from 'rxjs/operators'
 
-import { receive, RpcError } from '@observable-rpc/core'
+import {
+  send,
+  receive,
+  RpcError,
+  extractObservables,
+} from '@observable-rpc/core'
 
 import { createSocket } from './socket'
 import { parseOptions } from './options'
@@ -8,6 +14,7 @@ import { parseOptions } from './options'
 export class ObservableRpcClient {
   constructor(options) {
     const { url, log } = parseOptions(options)
+    this._log = log
     this._socket = createSocket(url)
 
     // emitted by the socket when an error can't be associated with a specific request
@@ -19,14 +26,29 @@ export class ObservableRpcClient {
   }
 
   call(method, params) {
+    const {
+      value: paramsWithObservablePlaceholders,
+      observables: paramObservables,
+    } = extractObservables(params)
+
     return new Rx.Observable(observer => {
       this._socket.emit(
         'rpc:sub',
         {
           method,
-          params,
+          params: paramsWithObservablePlaceholders,
         },
         ({ error, subId }) => {
+          observer.add(
+            Rx.merge(
+              ...paramObservables.map((obs, i) =>
+                Rx.fromEvent(this._socket, `rpc:sub:${subId}.${i}`).pipe(
+                  tap(() => send(this._log, this._socket, obs, `${subId}.${i}`))
+                )
+              )
+            ).subscribe()
+          )
+
           if (error) {
             observer.error(RpcError.fromErrorPacket(error))
           } else {

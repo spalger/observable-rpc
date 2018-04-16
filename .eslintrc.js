@@ -88,9 +88,10 @@ module.exports = {
      * Browser compatible files
      */
     {
-      files: ['projects/client/src/**/*.js'],
+      files: ['projects/client/src/**', 'projects/example/public/**'],
       env: {
         node: true,
+        browser: true,
       },
     },
 

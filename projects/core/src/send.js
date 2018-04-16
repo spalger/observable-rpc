@@ -1,6 +1,7 @@
 import * as Rx from 'rxjs'
-import { takeUntil, tap } from 'rxjs/operators'
+import { takeUntil, tap, catchError } from 'rxjs/operators'
 import { sharedListener } from './shared_listener'
+import { RpcError } from './rpc_error'
 
 /**
  * Send the events from an observable over a socket. The source
@@ -33,13 +34,16 @@ export function send(log, socket, source, subId) {
             error = new Error(`${typeof error} thrown`)
           }
 
-          socket.emit(`rpc:e:${subId}`, this._errorToErrorPacket(error))
+          socket.emit(`rpc:e:${subId}`, RpcError.from(error))
         },
 
         complete() {
           socket.emit(`rpc:c:${subId}`)
         },
       }),
+
+      // silence errors and complete since they are passed to the socket
+      catchError(() => []),
 
       // unsubscribes from source and sending notifications
       // when the socket unsubscribes or disconnects

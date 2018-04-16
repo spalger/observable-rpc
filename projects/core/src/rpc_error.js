@@ -72,10 +72,14 @@ export class RpcError extends Error {
     const { statusCode = 500, message, props } = options
     super(message)
 
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor)
+    if (options.stack) {
+      this.stack = options.stack
     } else {
-      this.stack = new Error().stack || ''
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, this.constructor)
+      } else {
+        this.stack = new Error().stack || ''
+      }
     }
 
     this.isRpcError = true

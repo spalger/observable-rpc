@@ -66,7 +66,9 @@ export class ObservableRpcRouter {
 
     socket.on('rpc:sub', (req, cb) => {
       try {
-        req = validate(req, ReqSchema, 'Request validation')
+        req = validate(req, ReqSchema, {
+          desc: 'Request validation',
+        })
       } catch (error) {
         cb({ error: RpcError.from(error) })
         return
@@ -95,7 +97,12 @@ export class ObservableRpcRouter {
         take(1),
 
         // execute the method and merge the result observable
-        mergeMap(context => method.exec(req, context))
+        mergeMap(context => {
+          return method.call(
+            method.validateParams(req.params, socket, subId),
+            context
+          )
+        })
       )
 
       send(this._log, socket, result$, subId)

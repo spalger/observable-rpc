@@ -7,7 +7,7 @@ import middleware from 'webpack-dev-middleware'
 import express from 'express'
 import { ObservableRpcRouter } from '@observable-rpc/router'
 import * as Rx from 'rxjs'
-import { take } from 'rxjs/operators'
+import { take, map } from 'rxjs/operators'
 
 const app = express()
 const server = createServer(app)
@@ -15,7 +15,7 @@ new ObservableRpcRouter({
   server,
   methods: [
     {
-      name: 'interval',
+      name: 'counter',
       validate(Joi) {
         return Joi.object()
           .keys({
@@ -28,6 +28,22 @@ new ObservableRpcRouter({
         return Rx.interval(ms).pipe(take(count))
       },
     },
+    {
+      name: 'reverse',
+      validate: Joi =>
+        Joi.observable()
+          .items(Joi.string().max(10))
+          .required(),
+      handler: value$ =>
+        value$.pipe(
+          map(v =>
+            v
+              .split('')
+              .reverse()
+              .join('')
+          )
+        ),
+    },
   ],
 })
 
@@ -37,6 +53,7 @@ app.use(
       mode: 'development',
       context: resolve(__dirname, 'public'),
       entry: './index',
+      devtool: 'cheap-source-map',
       plugins: [new HtmlWebpackPlugin()],
     })
   )

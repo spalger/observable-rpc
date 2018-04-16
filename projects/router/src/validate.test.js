@@ -13,13 +13,11 @@ it('throws if input does not match schema', () => {
   }).toThrowErrorMatchingSnapshot()
 })
 
-it('includes validation description if error message if supplied', () => {
+it('includes description in error message if supplied', () => {
   expect(() => {
-    validate(
-      {},
-      Joi.object({ foo: Joi.valid('bar').required() }),
-      'Foo validation'
-    )
+    validate({}, Joi.object({ foo: Joi.valid('bar').required() }), {
+      desc: 'Foo validation',
+    })
   }).toThrowErrorMatchingSnapshot()
 })
 

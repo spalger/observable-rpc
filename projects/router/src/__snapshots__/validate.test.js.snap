@@ -1,5 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`includes validation description if error message if supplied 1`] = `"Foo validation failure: child \\"foo\\" fails because [\\"foo\\" is required]"`;
+exports[`includes description in error message if supplied 1`] = `"Foo validation failure: child \\"foo\\" fails because [\\"foo\\" is required]"`;
 
 exports[`throws if input does not match schema 1`] = `"Validation failure: child \\"foo\\" fails because [\\"foo\\" is required]"`;
