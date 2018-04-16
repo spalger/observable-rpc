@@ -40,7 +40,9 @@ Wraps a Socket.IO WebSocket server and maps requests from clients to methods.
 
   - `name: String`: The name that clients will use to call this method
 
-  - `validate: (Joi) => JoiSchema`: *optional* -- A function to generate a [Joi](https://github.com/hapijs/joi) schema that will be used to validate params sent from callers.
+  - `validate: (Joi) => JoiSchema`: *optional* -- A function to generate a [Joi](https://github.com/hapijs/joi) schema that will be used to validate params sent from callers.<br>
+    <br>
+    In addition to the standard validation types available on the [Joi API](https://github.com/hapijs/joi/blob/master/API.md), the `Joi.observable()` function can be used to define a parameter from Clients that should be an observable. `Joi.observable().items(...a Joi schema...)` can be used to validate the items that the observable emits, sending errors to the Client when they emit invalid items. See the [reverse example](https://github.com/spalger/observable-rpc/blob/8980706c33296635e6a3919f89fd1eaf0bb7b38c/projects/example/run.js#L31-L46) for example usage.
 
   - `handler: (params, context) => Observable`: A function that takes validated params from callers and creates Observables that will be sent back to the caller.
 
