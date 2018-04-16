@@ -28,7 +28,7 @@ Wraps a Socket.IO client to send requests to the server and handle responses.
 
   - `msg: String`: The log message, probably pretty short
 
-  - `props: {[key: String]:any}`: An object of metadata relevant to the specific log message
+  - `data: any`: Metadata relevant to the specific log message
 
 #### methods
 - **`ObservableRpcClient#call(method, params): Observable`**

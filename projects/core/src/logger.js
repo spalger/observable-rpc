@@ -4,27 +4,27 @@ export class Logger {
   _subject = new Rx.Subject();
   [Rx.observable] = () => this._subject
 
-  error(msg, props = {}) {
+  error(msg, data) {
     this._subject.next({
       level: 'error',
       msg,
-      props,
+      data,
     })
   }
 
-  info(msg, props = {}) {
+  info(msg, data) {
     this._subject.next({
       level: 'info',
       msg,
-      props,
+      data,
     })
   }
 
-  debug(msg, props = {}) {
+  debug(msg, data) {
     this._subject.next({
       level: 'debug',
       msg,
-      props,
+      data,
     })
   }
 }

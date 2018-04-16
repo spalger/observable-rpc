@@ -32,7 +32,7 @@ Wraps a Socket.IO WebSocket server and maps requests from clients to methods.
 
   - `msg: String`: The log message, probably pretty short
 
-  - `props: {[key: String]:any}`: An object of metadata relevant to the specific log message
+  - `data: any`: Metadata relevant to the specific log message
 
 - **`options.methods`: `Array<MethodSpec>`**
 
