@@ -1,11 +1,11 @@
 {
   "name": "@observable-rpc/client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "jsnext:main": "src/index.js",
   "dependencies": {
-    "@observable-rpc/core": "0.1.1",
+    "@observable-rpc/core": "0.1.2",
     "max-safe-integer": "^1.0.1",
     "rxjs": "^6.0.0-beta.4",
     "socket.io-client": "^2.1.0"
