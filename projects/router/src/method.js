@@ -12,7 +12,7 @@ const SpecSchema = Joi.object()
 
 export class Method {
   constructor(spec) {
-    spec = validate(spec, SpecSchema)
+    spec = validate(spec, SpecSchema, 'Method validation')
 
     this._name = spec.name
     this._handler = spec.handler

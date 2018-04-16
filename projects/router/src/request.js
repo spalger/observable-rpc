@@ -13,7 +13,7 @@ const ReqSchema = Joi.object()
 
 export class Request {
   constructor(spec) {
-    spec = validate(spec, ReqSchema)
+    spec = validate(spec, ReqSchema, 'Request validation')
 
     this.id = spec.id
     this.method = spec.method
