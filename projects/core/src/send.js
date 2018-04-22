@@ -26,7 +26,8 @@ export function send(log, socket, source, subId) {
 
         error(error) {
           if (!(error instanceof Error)) {
-            log.error('non-error emitted by observable', {
+            log.error('Non-error emitted by observable', {
+              subId,
               source,
               error,
             })
@@ -34,7 +35,13 @@ export function send(log, socket, source, subId) {
             error = new Error(`${typeof error} thrown`)
           }
 
-          socket.emit(`rpc:e:${subId}`, RpcError.from(error))
+          const rpcError = RpcError.from(error)
+
+          if (rpcError.statusCode === 500) {
+            log.error('Server error', { subId, source, error: rpcError })
+          }
+
+          socket.emit(`rpc:e:${subId}`, rpcError)
         },
 
         complete() {
